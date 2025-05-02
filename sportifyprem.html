@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <link rel="icon" type="image/png" href="icon.png">
+    <title>Enhanced Music player</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Ubuntu&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Varela+Round&display=swap');
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Ubuntu', sans-serif;
+    min-height: 100vh;
+    animation: colorChange 5s infinite;
+}
+
+@keyframes colorChange {
+    0% { background-color: #2d2d2d; }
+    25% { background-color: #1db954; }
+    50% { background-color: #191414; }
+    75% { background-color: #535353; }
+    100% { background-color: #2d2d2d; }
+}
+
+nav {
+    background-color: #000;
+    color: white;
+    height: 65px;
+}
+
+nav ul {
+    display: flex;
+    align-items: center;
+    list-style-type: none;
+    padding: 0 20px;
+}
+
+.brand img {
+    width: 44px;
+    padding: 0 8px;
+}
+
+.brand {
+    display: flex;
+    align-items: center;
+    font-weight: bold;
+    font-size: 1.3rem;
+}
+
+.container {
+    min-height: 72vh;
+    background-color: rgba(0, 0, 0, 0.8);
+    color: white;
+    font-family: 'Varela Round', sans-serif;
+    margin: 23px auto;
+    max-width: 800px;
+    border-radius: 12px;
+    padding: 34px;
+    overflow-y: auto;
+}
+
+.songItem {
+    height: 60px;
+    display: flex;
+    background-color: rgba(255, 255, 255, 0.1);
+    color: white;
+    margin: 12px 0;
+    justify-content: space-between;
+    align-items: center;
+    border-radius: 34px;
+    padding: 0 15px;
+    transition: all 0.3s ease;
+}
+
+.songItem:hover {
+    background-color: rgba(255, 255, 255, 0.2);
+}
+
+.songItem img {
+    width: 43px;
+    margin: 0 15px;
+    border-radius: 50%;
+}
+
+.timestamp {
+    margin: 0 23px;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.timestamp i {
+    cursor: pointer;
+    font-size: 1.2rem;
+}
+
+.bottom {
+    position: sticky;
+    bottom: 0;
+    height: 130px;
+    background-color: #000;
+    color: white;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    padding: 20px;
+}
+
+.icons {
+    margin: 14px 0;
+    display: flex;
+    gap: 30px;
+}
+
+.icons i {
+    cursor: pointer;
+    transition: transform 0.2s ease;
+}
+
+.icons i:hover {
+    transform: scale(1.2);
+}
+
+#myProgressBar {
+    width: 80vw;
+    max-width: 600px;
+    cursor: pointer;
+    margin: 10px 0;
+    accent-color: #1db954;
+}
+
+.songInfo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-family: 'Varela Round', sans-serif;
+}
+
+.songInfo img {
+    opacity: 0;
+    transition: opacity 0.4s ease-in;
+}
+
+/* Responsive Design */
+@media (max-width: 600px) {
+    .container {
+        margin: 10px;
+        padding: 20px;
+    }
+    
+    .songItem {
+        height: 50px;
+        padding: 0 10px;
+    }
+    
+    .songItem img {
+        width: 35px;
+        margin: 0 10px;
+    }
+    
+    .bottom {
+        height: 100px;
+        padding: 10px;
+    }
+    
+    .icons {
+        gap: 20px;
+    }
+}
+    </style>
+</head>
+<body>
+    <nav>
+        <ul>
+            <li class="brand"><img src="logo.png" alt="Logo">Music Player </li>
+        </ul>
+    </nav>
+
+    <div class="container">
+        <div class="songItemContainer" id="songList"></div>
+    </div>
+
+    <div class="bottom">
+        <input type="range" id="myProgressBar" min="0" max="100" value="0">
+        <div class="icons">
+            <i class="fas fa-2x fa-backward" id="previous"></i>
+            <i class="fas fa-2x fa-play-circle" id="masterPlay"></i>
+            <i class="fas fa-2x fa-forward" id="next"></i>
+        </div>
+        <div class="songInfo">
+            <img src="playing.gif" width="35px" id="gif" alt="Playing">
+            <span id="masterSongName">Song name</span>
+        </div>
+    </div>
+
+    <script>
+        // Songs array
+const songs = [
+    {songName: "On & On", filePath: "songs/1.mp3", coverPath: "covers/1.jpg"},
+    {songName: "Invincible", filePath: "songs/2.mp3", coverPath: "covers/2.jpg"},
+    {songName: "Mortals", filePath: "songs/3.mp3", coverPath: "covers/3.jpg"},
+    {songName: "Shine", filePath: "songs/4.mp3", coverPath: "covers/4.jpg"},
+    {songName: "Why We Lose", filePath: "songs/5.mp3", coverPath: "covers/5.jpg"},
+    {songName: "Sky High", filePath: "songs/6.mp3", coverPath: "covers/6.jpg"},
+    {songName: "Symbolism", filePath: "songs/7.mp3", coverPath: "covers/7.jpg"},
+    {songName: "Heroes Tonight", filePath: "songs/8.mp3", coverPath: "covers/8.jpg"},
+    {songName: "Feel Good", filePath: "songs/9.mp3", coverPath: "covers/9.jpg"},
+    {songName: "My Heart", filePath: "songs/10.mp3", coverPath: "covers/10.jpg"}
+];
+
+// Initialize variables
+let songIndex = 0;
+let audioElement = new Audio();
+let masterPlay = document.getElementById('masterPlay');
+let myProgressBar = document.getElementById('myProgressBar');
+let gif = document.getElementById('gif');
+let masterSongName = document.getElementById('masterSongName');
+let songList = document.getElementById('songList');
+
+// Populate song list
+songs.forEach((song, i) => {
+    let songItem = document.createElement('div');
+    songItem.classList.add('songItem');
+    songItem.innerHTML = `
+        <img src="${song.coverPath}" alt="${song.songName}">
+        <span class="songName">${song.songName}</span>
+        <span class="timestamp">2:50 
+            <i class="far songItemPlay fa-play-circle" data-index="${i}"></i>
+        </span>
+    `;
+    songList.appendChild(songItem);
+});
+
+let songItems = Array.from(document.getElementsByClassName('songItemPlay'));
+
+// Reset all play buttons
+const makeAllPlays = () => {
+    songItems.forEach((element) => {
+        element.classList.remove('fa-pause-circle');
+        element.classList.add('fa-play-circle');
+    });
+};
+
+// Play song function
+const playSong = () => {
+    audioElement.src = songs[songIndex].filePath;
+    masterSongName.innerText = songs[songIndex].songName;
+    audioElement.currentTime = 0;
+    audioElement.play()
+        .then(() => {
+            masterPlay.classList.remove('fa-play-circle');
+            masterPlay.classList.add('fa-pause-circle');
+            gif.style.opacity = 1;
+            makeAllPlays();
+            songItems[songIndex].classList.remove('fa-play-circle');
+            songItems[songIndex].classList.add('fa-pause-circle');
+        })
+        .catch((error) => console.error("Error playing audio:", error));
+};
+
+// Master Play/Pause
+masterPlay.addEventListener('click', () => {
+    if (audioElement.paused || audioElement.currentTime <= 0) {
+        playSong();
+    } else {
+        audioElement.pause();
+        masterPlay.classList.remove('fa-pause-circle');
+        masterPlay.classList.add('fa-play-circle');
+        gif.style.opacity = 0;
+        makeAllPlays();
+    }
+});
+
+// Progress bar update
+audioElement.addEventListener('timeupdate', () => {
+    if (!isNaN(audioElement.duration)) {
+        const progress = (audioElement.currentTime / audioElement.duration) * 100;
+        myProgressBar.value = progress;
+    }
+});
+
+// Seek functionality
+myProgressBar.addEventListener('input', () => {
+    const seekTime = (myProgressBar.value * audioElement.duration) / 100;
+    audioElement.currentTime = seekTime;
+});
+
+// Individual song play
+songItems.forEach((element) => {
+    element.addEventListener('click', (e) => {
+        songIndex = parseInt(e.target.dataset.index);
+        playSong();
+    });
+});
+
+// Next button
+document.getElementById('next').addEventListener('click', () => {
+    songIndex = (songIndex + 1) % songs.length;
+    playSong();
+});
+
+// Previous button
+document.getElementById('previous').addEventListener('click', () => {
+    songIndex = (songIndex - 1 + songs.length) % songs.length;
+    playSong();
+});
+
+// Auto-play next song
+audioElement.addEventListener('ended', () => {
+    songIndex = (songIndex + 1) % songs.length;
+    playSong();
+});
+    </script>
+</body>
+</html>
